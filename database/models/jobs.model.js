@@ -1,4 +1,5 @@
 import { DataTypes } from "sequelize";
+import Company from "./company.model.js";
 import sequelize from "../../config/dbConfig.js";
 
 const Jobs = sequelize.define('Job',{
@@ -9,7 +10,7 @@ const Jobs = sequelize.define('Job',{
     },
     title:{
         type: DataTypes.STRING,
-        allowNull:FontFaceSetLoadEvent,
+        allowNull:false,
         
     },
     description:{
@@ -20,7 +21,7 @@ const Jobs = sequelize.define('Job',{
         type:DataTypes.INTEGER,
         allowNull: false,
         references:{
-            model: "Company",
+            model: Company,
             key: "id"
         }
     },
@@ -38,7 +39,7 @@ const Jobs = sequelize.define('Job',{
         defaultValue: 'active'
     },
     salary:{
-        type:DataTypes.DECIMAL,
+        type:DataTypes.STRING,
         allowNull: true,
         defaultValue: 'Competitive'
     },
@@ -50,3 +51,12 @@ const Jobs = sequelize.define('Job',{
 
 
 export default Jobs;
+
+export const jobsTable= async()=>{
+    try {
+        await Jobs.sync()
+        console.log('Jobs table  successfully created');
+    } catch (error) {
+        console.error('Error creating jobs table:', error)   
+    }  
+}

@@ -42,3 +42,13 @@ const Users = sequelize.define('User',{
 
 
 export default Users;
+
+
+export const usersTable= async()=>{
+    try {
+        await Users.sync()
+        console.log('Users table  successfully created');
+    } catch (error) {
+        console.error('Error creating users table:', error)   
+    }  
+}

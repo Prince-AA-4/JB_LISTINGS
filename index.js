@@ -1,25 +1,64 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import sequelize from './config/dbConfig.js';
-dotenv.config();
+import express from "express";
+import dotenv from "dotenv";
+import sequelize from "./config/dbConfig.js";
+import Users from "./database/models/index.js";
+import Companies from "./database/models/index.js";
+import Jobs from "./database/models/index.js";
+import Applications from "./database/models/index.js";
+import { usersTable } from "./database/models/user.model.js";
+import { companyTable } from "./database/models/company.model.js";
+import { applicationTable } from "./database/models/applications.model.js";
+import { jobsTable } from "./database/models/jobs.model.js";
+import userRoutes from "./routes/user.route.js";
+import jobRoutes from "./routes/jobs.route.js";
+import companyRoutes from "./routes/company.route.js";
+import applicationRoutes from "./routes/application.route.js";
+import cors from "cors";
+import cookieParser from "cookie-parser";
 
+dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(express.json())
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser())
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    credentials: true,
+  })
+);
+
+app.use("/api/users", userRoutes);
+app.use("/api/companies", companyRoutes);
+app.use("/api/jobs", jobRoutes);
+app.use("/api/applications", applicationRoutes);
 
 
-const startServer = async ()=>{
-    try {
-        await sequelize.authenticate();
-        console.log('Database conected succesfully.');
-        app.listen(port, ()=>{
-            console.log(`Serverver is runnung on port http://localhost:${port}`)
-        })
-    } catch (error) {
-        console.error('Failed to start Server:', error)  
-    }
-}
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(err.status || 500).json({
+    message: err.message || 'Internal Server Error',
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+  });
+});
 
-startServer()
+const startServer = async () => {
+  try {
+    await sequelize.authenticate();
+    console.log("Database conected succesfully.");
+    app.listen(port, () => {
+      console.log(`Serverver is runnung on port http://localhost:${port}`);
+    });
+  } catch (error) {
+    console.error("Failed to start Server:", error);
+  }
+};
+
+startServer();
+usersTable();      
+companyTable();    
+jobsTable()
+applicationTable();

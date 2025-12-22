@@ -1,20 +1,23 @@
-import Users from "./user.mode";
-import Jobs from "./job.model.js";  
+import Users from "./user.model.js";
+import Jobs from "./jobs.model.js";  
 import Company from "./company.model.js";
+import Applications from "./applications.model.js";
 
 
 // Create associations
 
 Users.hasMany(Company,
-    {foreignKey: 'userId',
-        as: 'companies',
+    {
+        foreignKey: 'userId',
+        as: 'company',
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE'
     }
 );
 
-Company.belongsTo(Users,{
-    foreignKey: 'userId',
+Company.belongsTo(Users,
+    {
+        foreignKey: 'userId',
     as: 'User'
 });
 
@@ -29,5 +32,32 @@ Company.hasMany(Jobs,{
 
 Jobs.belongsTo(Company,{
     foreignKey: 'companyId',
-    as:'company'
+    as:'Company'
 })
+
+Users.hasMany(Applications,{
+    foreignKey: 'userId',
+    as: 'applications',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE'
+})
+
+Applications.belongsTo(Users,{
+    foreignKey: 'userId',
+    as: 'user',
+})
+
+Jobs.hasMany(Applications,{
+    foreignKey: 'jobId',
+    as: 'applications',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE'
+})
+
+Applications.belongsTo(Jobs,{
+    foreignKey:'jobId',
+    as:'job'
+})
+
+
+export default {Users, Company, Jobs, Applications}

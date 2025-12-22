@@ -1,5 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../config/dbConfig.js";
+import Users from "./user.model.js";
 
 
 const Company = sequelize.define('Company',{
@@ -35,7 +36,7 @@ const Company = sequelize.define('Company',{
         type:DataTypes.INTEGER,
         allowNull:false,
         references:{
-            model: 'User',
+            model: Users,
             key: 'id'
         }
     }
@@ -43,3 +44,12 @@ const Company = sequelize.define('Company',{
 
 
 export default Company;
+
+export const companyTable= async()=>{
+    try {
+        await Company.sync()
+        console.log('Company table  successfully created');
+    } catch (error) {
+        console.error('Error creating company table:', error)   
+    }  
+}
