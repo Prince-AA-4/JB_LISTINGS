@@ -9,6 +9,11 @@ export const createApplication = async (req, res) => {
     const { jobId, resume } = req.body;
     const userId = req.user.id;
 
+    // Validate required fields
+    if (!jobId || !resume) {
+      return res.status(400).json({ message: "Job ID and resume are required" });
+    }
+
     // Check if job exists and is active
     const job = await Jobs.findByPk(jobId);
     if (!job) {
@@ -33,22 +38,50 @@ export const createApplication = async (req, res) => {
       return res.status(400).json({ message: "You have already applied for this job" });
     }
 
+    // Convert base64 resume to Buffer for BLOB storage
+    let resumeBuffer = null;
+    
+    if (resume) {
+      try {
+        // Check if resume is base64 encoded (starts with data:)
+        if (resume.startsWith('data:')) {
+          // Extract the base64 data part (after the comma)
+          const base64Data = resume.split(',')[1];
+          resumeBuffer = Buffer.from(base64Data, 'base64');
+        } else {
+          // If it's already just base64 string without prefix
+          resumeBuffer = Buffer.from(resume, 'base64');
+        }
+      } catch (error) {
+        return res.status(400).json({ message: "Invalid resume format" });
+      }
+    }
+
+    // Create application
     const newApplication = await Applications.create({
       jobId,
       userId,
-      resume,
+      resume: resumeBuffer,
       status: 'applied',
     });
 
     return res.status(201).json({
       message: "Application submitted successfully",
-      application: newApplication,
+      application: {
+        id: newApplication.id,
+        jobId: newApplication.jobId,
+        userId: newApplication.userId,
+        status: newApplication.status,
+        createdAt: newApplication.createdAt,
+        updatedAt: newApplication.updatedAt
+      }
     });
   } catch (error) {
-    console.error(error);
+    console.error('Error creating application:', error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
 
 export const getAllApplications = async (req, res) => {
   try {

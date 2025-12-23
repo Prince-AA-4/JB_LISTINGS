@@ -10,9 +10,9 @@ import {
   getMyApplications,
   getApplicationsByJob
 } from '../controllers/application.controller.js';
+import { createApplicationSchema, updateApplicationSchema } from '../schemas/applicationValschema.js';
 
-// Import validation schemas (create these if you haven't)
-// import { createApplicationSchema, updateApplicationStatusSchema } from '../validation/application.validation.js';
+
 
 const router = express.Router();
 
@@ -24,10 +24,9 @@ const router = express.Router();
 router.post('/', 
   authentication, 
   authorize('applicant'), 
+  validateRequest(createApplicationSchema),
   createApplication
 );
-// If you have validation schema, use:
-// router.post('/', authentication, authorize('applicant'), validateRequest(createApplicationSchema), createApplication);
 
 // Get my applications (Applicant only)
 router.get('/my-applications', 
@@ -67,10 +66,9 @@ router.get('/:id',
 router.patch('/:id/status', 
   authentication, 
   authorize('employer', 'admin'), 
+  validateRequest(updateApplicationSchema),
   updateApplicationStatus
 );
-// If you have validation schema, use:
-// router.patch('/:id/status', authentication, authorize('employer', 'admin'), validateRequest(updateApplicationStatusSchema), updateApplicationStatus);
 
 // Get all applications for a specific job (Employer & Admin only - ownership checked in controller)
 router.get('/job/:jobId', 
