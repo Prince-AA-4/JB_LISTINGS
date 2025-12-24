@@ -21,7 +21,7 @@ const router = express.Router();
 // ============================================
 
 // Create a new application (Applicant only)
-router.post('/', 
+router.post('/:jobId', 
   authentication, 
   authorize('applicant'), 
   validateRequest(createApplicationSchema),

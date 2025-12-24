@@ -4,7 +4,8 @@ const validateRequest = (schema)=> {
             const {error} = schema.validate(req.body, {abortEarly: false})
             console.error(error);
             if (error){
-                res.status(400).json({errors: error.details.map((err) = err.message)})
+                const errors = error.details.map((error) => error.message);
+                return res.status(400).json({ errors }); 
             }
             next();
         } catch (error) {

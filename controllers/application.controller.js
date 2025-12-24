@@ -2,17 +2,16 @@ import Applications from "../database/models/applications.model.js";
 import Jobs from "../database/models/jobs.model.js";
 import Users from "../database/models/user.model.js";
 import Company from "../database/models/company.model.js";
+import Buffer from 'buffer'
 import { Op } from "sequelize";
 
 export const createApplication = async (req, res) => {
   try {
-    const { jobId, resume } = req.body;
+    const { resume } = req.body;
     const userId = req.user.id;
+    const{ jobId } = req.params
 
-    // Validate required fields
-    if (!jobId || !resume) {
-      return res.status(400).json({ message: "Job ID and resume are required" });
-    }
+  
 
     // Check if job exists and is active
     const job = await Jobs.findByPk(jobId);
@@ -39,9 +38,9 @@ export const createApplication = async (req, res) => {
     }
 
     // Convert base64 resume to Buffer for BLOB storage
-    let resumeBuffer = null;
+    if(resume){
+      let resumeBuffer = null;
     
-    if (resume) {
       try {
         // Check if resume is base64 encoded (starts with data:)
         if (resume.startsWith('data:')) {
