@@ -32,7 +32,7 @@ const Applications = sequelize.define('Application',{
 
     },
     resume:{
-        type:DataTypes.BLOB,
+        type:DataTypes.STRING,
         allowNull: false,
     }
 })

@@ -2,16 +2,14 @@ import Applications from "../database/models/applications.model.js";
 import Jobs from "../database/models/jobs.model.js";
 import Users from "../database/models/user.model.js";
 import Company from "../database/models/company.model.js";
-import Buffer from 'buffer'
+import path from "path";
 import { Op } from "sequelize";
 
 export const createApplication = async (req, res) => {
   try {
-    const { resume } = req.body;
     const userId = req.user.id;
-    const{ jobId } = req.params
-
-  
+    const{ jobId } = req.params;
+    const file = req.file;
 
     // Check if job exists and is active
     const job = await Jobs.findByPk(jobId);
@@ -37,31 +35,16 @@ export const createApplication = async (req, res) => {
       return res.status(400).json({ message: "You have already applied for this job" });
     }
 
-    // Convert base64 resume to Buffer for BLOB storage
-    if(resume){
-      let resumeBuffer = null;
-    
-      try {
-        // Check if resume is base64 encoded (starts with data:)
-        if (resume.startsWith('data:')) {
-          // Extract the base64 data part (after the comma)
-          const base64Data = resume.split(',')[1];
-          resumeBuffer = Buffer.from(base64Data, 'base64');
-        } else {
-          // If it's already just base64 string without prefix
-          resumeBuffer = Buffer.from(resume, 'base64');
-        }
-      } catch (error) {
-        return res.status(400).json({ message: "Invalid resume format" });
-      }
+    if (!file){
+      return res.status(400).json({message: " Resume file required"});
     }
-
+    
     // Create application
     const newApplication = await Applications.create({
       jobId,
       userId,
-      resume: resumeBuffer,
-      status: 'applied',
+      resume: file.path,
+      status: 'applied'
     });
 
     return res.status(201).json({
@@ -350,6 +333,11 @@ export const getApplicationsByJob = async (req, res) => {
           as: "user",
           attributes: ["id", "fullName", "userName", "email", "contact"],
         },
+        {
+          model:Jobs,
+          as: "job",
+          attributes: ['id', 'title', 'jobType', 'location', 'salary'],
+        }
       ],
       order: [["createdAt", "DESC"]],
     });
@@ -361,6 +349,26 @@ export const getApplicationsByJob = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
+export const getResume = async (req, res) => {
+  try {
+    const { applicationId } = req.params;
+    const application = await Applications.findByPk(applicationId);
+
+    if (!application || !application.resume) {
+      return res.status(404).json({ message: "Resume not found" });
+    }
+
+    // Build absolute path safely
+    // const absolutePath = path.join(process.cwd(), application.resume);
+
+    return res.sendFile(application.resume); // ✅ only via authenticated route
+  } catch (error) {
+    console.error("Error fetching resume:", error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
