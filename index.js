@@ -15,9 +15,9 @@ import companyRoutes from "./routes/company.route.js";
 import applicationRoutes from "./routes/application.route.js";
 import adminRoutes from "./routes/admin.route.js";
 import resumeRoutes from "./routes/resume.route.js";
+import passwordRoutes from "./routes/password.route.js"
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import path from "path";
 
 dotenv.config();
 
@@ -33,7 +33,7 @@ app.use(
     credentials: true,
   })
 );
-// app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
 
 app.use("/api/users", userRoutes);
 app.use("/api/companies", companyRoutes);
@@ -41,6 +41,7 @@ app.use("/api/jobs", jobRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/uploads", resumeRoutes);
+app.use("/api/passwords", passwordRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -55,7 +56,7 @@ const startServer = async () => {
     await sequelize.authenticate();
     console.log("Database conected succesfully.");
     app.listen(port, () => {
-      console.log(`Serverver is runnung on port http://localhost:${port}`);
+      console.log(`Server is runnung on port http://localhost:${port}`);
     });
   } catch (error) {
     console.error("Failed to start Server:", error);

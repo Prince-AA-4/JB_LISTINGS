@@ -36,6 +36,14 @@ const Users = sequelize.define('User',{
     role:{
         type: DataTypes.ENUM('admin', 'employer','applicant'),
         allowNull: false,
+    },
+    resetPasswordToken: {
+        type: DataTypes.STRING,
+        allowNull: true // Only has a value when a reset is requested
+    },
+    resetPasswordExpires: {
+        type: DataTypes.DATE,
+        allowNull: true // Only has a value when a reset is requested
     }
 })
 
@@ -46,7 +54,7 @@ export default Users;
 
 export const usersTable= async()=>{
     try {
-        await Users.sync()
+        await Users.sync({alter: true})
         console.log('Users table  successfully created');
     } catch (error) {
         console.error('Error creating users table:', error)   
